@@ -13,7 +13,10 @@ import {
   Target,
   Compass,
   SatelliteDish,
-  Search
+  Search,
+  Moon,
+  Sun,
+  Languages
 } from 'lucide-react';
 import RiskMap from './components/RiskMap';
 import DiseaseCard from './components/DiseaseCard';
@@ -21,6 +24,7 @@ import WeatherStats from './components/WeatherStats';
 import PreventiveTips from './components/PreventiveTips';
 import DiseaseCategorySelector from './components/DiseaseCategorySelector';
 import { fetchPredictions, fetchWeatherData, generatePredictions } from './services/api';
+import { translations } from './translations';
 
 const RISK_ORDER = ['critical', 'high', 'medium', 'low'];
 
@@ -46,12 +50,16 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [diseaseCategory, setDiseaseCategory] = useState('human');
+  const [darkMode, setDarkMode] = useState(false);
+  const [language, setLanguage] = useState('en');
+
+  const t = translations[language];
 
   const navLinks = [
-    { label: 'Overview', href: '#hero' },
-    { label: 'Dashboard', href: '#dashboard' },
-    { label: 'Insights', href: '#insights' },
-    { label: 'Alerts', href: '#alerts' }
+    { label: t.overview, href: '#hero' },
+    { label: t.dashboard, href: '#dashboard' },
+    { label: t.insights, href: '#insights' },
+    { label: t.alerts, href: '#alerts' }
   ];
 
   const heroStats = [
@@ -303,7 +311,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden">
+    <div className={`min-h-screen overflow-hidden ${darkMode ? 'dark-mode' : ''}`}>
       <div className="hero-glow" />
       <div className="pattern-overlay" />
       <div className="floating-shape float-one" />
@@ -320,8 +328,8 @@ export default function App() {
               <Activity className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-semibold gradient-text">Prescure</h1>
-              <p className="text-xs text-gray-500">Weather-aware outbreak radar</p>
+              <h1 className="text-2xl font-semibold gradient-text">{t.title}</h1>
+              <p className="text-xs text-gray-500">{t.subtitle}</p>
             </div>
           </div>
 
@@ -338,8 +346,27 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button onClick={handleDocs} className="text-sm font-medium text-gray-600 hover:text-gray-900 transition">Docs</button>
-            <button onClick={handleLaunchDashboard} className="primary-btn">Launch Dashboard</button>
+            <div className="relative">
+              <button
+                onClick={() => setLanguage(language === 'en' ? 'hi' : language === 'hi' ? 'es' : 'en')}
+                className="p-2 rounded-full hover:bg-gray-100 transition"
+                title="Change Language"
+              >
+                <Languages className="w-5 h-5 text-gray-600" />
+              </button>
+              <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-xs font-bold bg-blue-500 text-white rounded-full">
+                {language.toUpperCase()}
+              </span>
+            </div>
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-2 rounded-full hover:bg-gray-100 transition"
+              title={darkMode ? 'Light Mode' : 'Dark Mode'}
+            >
+              {darkMode ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-gray-600" />}
+            </button>
+            <button onClick={handleDocs} className="text-sm font-medium text-gray-600 hover:text-gray-900 transition">{t.docs}</button>
+            <button onClick={handleLaunchDashboard} className="primary-btn">{t.launchDashboard}</button>
           </div>
         </motion.nav>
 
@@ -375,7 +402,7 @@ export default function App() {
             >
               <div className="flex items-center justify-center gap-2">
                 <span className="text-2xl">👨⚕️</span>
-                <span>Human Diseases</span>
+                <span>{t.humanDiseases}</span>
               </div>
             </motion.button>
 
@@ -394,7 +421,7 @@ export default function App() {
             >
               <div className="flex items-center justify-center gap-2">
                 <span className="text-2xl">🌾</span>
-                <span>Crop Diseases</span>
+                <span>{t.cropDiseases}</span>
               </div>
             </motion.button>
           </div>
@@ -437,13 +464,10 @@ export default function App() {
               </span>
 
               <h2 className="text-4xl sm:text-5xl font-bold leading-tight text-slate-900">
-                Anticipate outbreaks hours before they trend.
+                {t.heroTitle}
               </h2>
               <p className="text-lg text-slate-600 leading-relaxed">
-                Prescure blends live meteorology with epidemiology so teams can
-                triage dengue, malaria, flu, and crop threats with confidence.
-                Track shifts, deploy alerts, and pin down preventive playbooks
-                from one beautiful command center.
+                {t.heroDescription}
               </p>
 
               <div className="flex flex-wrap gap-4">
@@ -451,13 +475,13 @@ export default function App() {
                   className="primary-btn"
                   onClick={() => scrollToSection('dashboard')}
                 >
-                  Start monitoring
+                  {t.startMonitoring}
                 </button>
                 <button
                   className="secondary-btn"
                   onClick={() => scrollToSection('insights')}
                 >
-                  View live demo
+                  {t.viewDemo}
                 </button>
               </div>
 
