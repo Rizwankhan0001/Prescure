@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Patient & Doctor Login</title>
+  <meta name="description" content="Unified login page for Patients and Doctors" />
+  <style>
+    :root{
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --accent-patient: #0ea5a3; /* teal */
+      --accent-doctor: #0b5cff; /* blue */
+      --muted:#6b7280;
+      --shadow: 0 6px 20px rgba(15,23,42,0.08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 100%);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:32px;
+      color:#0f172a;
+    }
+
+    .container{
+      width:100%;
+      max-width:980px;
+      display:grid;
+      grid-template-columns: 430px 1fr;
+      gap:28px;
+      align-items:center;
+    }
+
+    /* Left panel: visual / marketing */
+    .hero{
+      background:linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.3));
+      border-radius:16px;
+      padding:28px;
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+      height:100%;
+    }
+    .logo{font-weight:700;display:flex;gap:12px;align-items:center}
+    .logo .mark{width:44px;height:44px;border-radius:10px;background:linear-gradient(180deg,var(--accent-patient),var(--accent-doctor));display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+    .hero h1{margin:0;font-size:20px}
+    .hero p{margin:0;color:var(--muted);line-height:1.45}
+
+    /* Right panel: form card */
+    .card{
+      background:var(--card);
+      border-radius:14px;
+      padding:26px;
+      box-shadow:var(--shadow);
+    }
+
+    .role-switch{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-bottom:18px;
+    }
+
+    .role-toggle{display:flex;border-radius:999px;padding:4px;background:#f1f5f9;border:1px solid #e6eefc}
+    .role-toggle button{
+      border:0;background:transparent;padding:10px 18px;border-radius:999px;font-weight:600;cursor:pointer;color:var(--muted);transition:all .18s ease;
+    }
+    .role-toggle button.active{
+      color:white;background:var(--accent-patient);box-shadow:0 6px 18px rgba(14,165,163,0.18);
+    }
+    /* Doctor active variant will be applied dynamically */
+
+    form{display:flex;flex-direction:column;gap:12px}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+    .input{
+      display:flex;align-items:center;gap:8px;border:1px solid #e6eefc;padding:12px;border-radius:8px;background:#fff;outline:none
+    }
+    .input input{border:0;outline:0;font-size:15px;width:100%;background:transparent}
+    .field{display:flex;flex-direction:column}
+
+    .row{display:flex;gap:12px}
+    .row .field{flex:1}
+
+    .actions{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+    .checkbox{display:flex;gap:8px;align-items:center;color:var(--muted)}
+    .btn{
+      padding:12px 16px;border-radius:10px;border:0;font-weight:700;cursor:pointer;font-size:15px
+    }
+
+    .btn-primary{background:var(--accent-patient);color:white;box-shadow:0 8px 28px rgba(14,165,163,0.12)}
+    .btn-outline{border:1px solid #e6eefc;background:transparent;color:var(--muted)}
+
+    .divider{display:flex;align-items:center;gap:12px;margin:18px 0}
+    .divider:before,.divider:after{content:'';flex:1;height:1px;background:#eef2ff}
+    .small{font-size:13px;color:var(--muted);text-align:center}
+
+    .socials{display:flex;gap:10px}
+    .socials button{flex:1;padding:10px;border-radius:10px;border:1px solid #eef2ff;background:transparent;display:flex;gap:10px;align-items:center;justify-content:center}
+
+    .muted-link{color:var(--muted);text-decoration:none}
+
+    .role-cards{display:flex;gap:10px;margin-bottom:12px}
+    .role-card{flex:1;padding:12px;border-radius:10px;border:1px solid transparent;display:flex;gap:12px;align-items:center;cursor:pointer}
+    .role-card .icon{width:44px;height:44;border-radius:10px;display:flex;align-items:center;justify-content:center;color:white}
+    .role-card .meta{display:flex;flex-direction:column}
+    .role-card h4{margin:0}
+    .role-card p{margin:0;color:var(--muted);font-size:13px}
+
+    /* status / message */
+    .message{padding:10px;border-radius:8px;background:#fffbeb;color:#92400e;border:1px solid #fef3c7;font-size:13px}
+
+    footer{margin-top:14px;font-size:13px;color:var(--muted)}
+
+    /* responsive */
+    @media (max-width:900px){
+      .container{grid-template-columns:1fr;}
+      .hero{order:2}
+    }
+  </style>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <div class="container" role="main">
+    <aside class="hero" aria-hidden="false">
+      <div class="logo"><span class="mark">H+</span><div style="display:flex;flex-direction:column"><strong>HealthConnect</strong><small style="color:var(--muted)">Secure patient-doctor portal</small></div></div>
+      <h1>One login — two roles</h1>
+      <p>Choose whether you're signing in as a <strong>Patient</strong> or a <strong>Doctor</strong>. The form below adapts to show role-specific labels and security options.</p>
+
+      <div style="margin-top:auto;font-size:13px;color:var(--muted)">
+        Tip: Doctors can enable two-factor authentication in their profile for extra security.
+      </div>
+    </aside>
+
+    <section class="card" aria-labelledby="login-heading">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div>
+          <h2 id="login-heading" style="margin:0">Sign in</h2>
+          <div style="font-size:13px;color:var(--muted);margin-top:6px">Welcome back — please sign in to continue</div>
+        </div>
+        <div style="font-size:13px;color:var(--muted)"><a href="#" class="muted-link">Help</a></div>
+      </div>
+
+      <!-- Role visual cards (clickable) -->
+      <div class="role-cards" role="tablist" aria-label="Login role selection">
+        <div class="role-card" data-role="patient" tabindex="0" aria-selected="true">
+          <div class="icon" style="background:linear-gradient(180deg,var(--accent-patient),#06b6a4)">P</div>
+          <div class="meta"><h4>Patient</h4><p>Access your appointments, prescriptions and records</p></div>
+        </div>
+
+        <div class="role-card" data-role="doctor" tabindex="0" aria-selected="false">
+          <div class="icon" style="background:linear-gradient(180deg,var(--accent-doctor),#0b6cff)">D</div>
+          <div class="meta"><h4>Doctor</h4><p>View your schedule, patient list and messages</p></div>
+        </div>
+      </div>
+
+      <!-- Role toggle (compact) -->
+      <div class="role-switch">
+        <div class="role-toggle" role="tablist" aria-label="Switch role">
+          <button id="btn-patient" class="active" role="tab" aria-selected="true">Patient</button>
+          <button id="btn-doctor" role="tab" aria-selected="false">Doctor</button>
+        </div>
+      </div>
+
+      <!-- Message area for errors / info -->
+      <div id="messageArea" style="display:none" class="message" role="status"></div>
+
+      <form id="loginForm" autocomplete="on" novalidate>
+
+        <div class="field">
+          <label id="label-identifier" for="identifier">Patient ID or Email</label>
+          <div class="input">
+            <input id="identifier" name="identifier" type="text" inputmode="email" placeholder="you@example.com or P-123456" required aria-describedby="identifierDesc">
+          </div>
+          <div id="identifierDesc" style="font-size:12px;color:var(--muted);margin-top:6px">Use your account email or system ID.</div>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="input">
+            <input id="password" name="password" type="password" placeholder="Enter your password" required aria-describedby="pwdHelp">
+            <button type="button" id="togglePwd" aria-label="Show password" title="Show password" style="border:0;background:none;cursor:pointer;font-weight:600">Show</button>
+          </div>
+          <div id="pwdHelp" style="font-size:12px;color:var(--muted);margin-top:6px">Minimum 8 characters. Use a secure password.</div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label style="visibility:hidden">Spacer</label>
+            <div class="actions">
+              <label class="checkbox"><input type="checkbox" id="remember"/> Remember me</label>
+              <a href="#" class="muted-link">Forgot password?</a>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center;margin-top:6px">
+          <button id="submitBtn" class="btn btn-primary" type="submit">Sign in as Patient</button>
+          <button type="button" class="btn btn-outline" id="demoBtn">Demo</button>
+        </div>
+
+        <div class="divider"><span class="small">or continue with</span></div>
+
+        <div class="socials">
+          <div id="g_id_onload"
+     data-client_id="API_KEY"
+     data-context="signin"
+     data-ux_mode="popup"
+     data-callback="handleCredentialResponse">
+</div>
+
+<div class="g_id_signin" 
+     data-type="standard"
+     data-size="large"
+     data-theme="outline"
+     data-shape="rectangular"
+     data-text="continue_with">
+</div>
+
+          <button type="button" aria-label="Continue with Apple">Apple</button>
+        </div>
+
+        <footer>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+            <div style="font-size:13px;color:var(--muted)">Don't have an account? <a href="#">Sign up</a></div>
+            <div style="font-size:12px;color:var(--muted)">Secure · HIPAA-aware</div>
+          </div>
+        </footer>
+      </form>
+
+    </section>
+  </div>
+
+  <script>
+    // Basic interactivity for role switching and small UX touches
+    (function(){
+      const roleCards = document.querySelectorAll('.role-card');
+      const btnPatient = document.getElementById('btn-patient');
+      const btnDoctor = document.getElementById('btn-doctor');
+      const submitBtn = document.getElementById('submitBtn');
+      const labelId = document.getElementById('label-identifier');
+      const identifier = document.getElementById('identifier');
+      const messageArea = document.getElementById('messageArea');
+      const togglePwd = document.getElementById('togglePwd');
+      const passwordField = document.getElementById('password');
+      const container = document.querySelector('.container');
+
+      let role = 'patient'; // default
+
+      function setRole(r){
+        role = r;
+        // update visual active states
+        roleCards.forEach(c=>{
+          const is = c.dataset.role === r;
+          c.style.borderColor = is ? (r==='patient'? 'rgba(6,182,162,0.18)' : 'rgba(11,108,255,0.18)') : 'transparent';
+          c.setAttribute('aria-selected', is? 'true':'false');
+        });
+
+        btnPatient.classList.toggle('active', r==='patient');
+        btnDoctor.classList.toggle('active', r==='doctor');
+
+        // update colors and submit label
+        if(r==='patient'){
+          submitBtn.textContent = 'Sign in as Patient';
+          submitBtn.style.background = 'var(--accent-patient)';
+          document.documentElement.style.setProperty('--accent-current', 'var(--accent-patient)');
+          labelId.textContent = 'Patient ID or Email';
+          identifier.placeholder = 'you@example.com or P-123456';
+        } else {
+          submitBtn.textContent = 'Sign in as Doctor';
+          submitBtn.style.background = 'var(--accent-doctor)';
+          document.documentElement.style.setProperty('--accent-current', 'var(--accent-doctor)');
+          labelId.textContent = 'Doctor ID / Email';
+          identifier.placeholder = 'you@hospital.org or D-98765';
+        }
+      }
+
+      // attach events
+      roleCards.forEach(card=>{
+        card.addEventListener('click', ()=> setRole(card.dataset.role));
+        card.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setRole(card.dataset.role);} });
+      });
+
+      btnPatient.addEventListener('click', ()=> setRole('patient'));
+      btnDoctor.addEventListener('click', ()=> setRole('doctor'));
+
+      // password toggle
+      togglePwd.addEventListener('click', ()=>{
+        const t = passwordField;
+        if(t.type === 'password'){ t.type='text'; togglePwd.textContent='Hide'; togglePwd.setAttribute('aria-label','Hide password'); }
+        else { t.type='password'; togglePwd.textContent='Show'; togglePwd.setAttribute('aria-label','Show password'); }
+      });
+
+      // form submit (demo stub)
+      document.getElementById('loginForm').addEventListener('submit', function(e){
+        e.preventDefault();
+        // simple validation
+        if(!identifier.value.trim() || !passwordField.value.trim()){
+          showMessage('Please enter both identifier and password.', true);
+          return;
+        }
+
+        // role-specific security hint
+        if(role === 'doctor'){
+          showMessage('Doctors should have two-factor authentication enabled for best security.', false, 5000);
+        } else {
+          showMessage('Signing in… (this demo page does not actually authenticate)', false, 3000);
+        }
+
+        // in a real app: perform fetch to backend, handle errors, set cookies/session, redirect
+      });
+
+      document.getElementById('demoBtn').addEventListener('click', ()=>{
+        identifier.value = role === 'patient' ? 'patient@example.com' : 'doctor@hospital.org';
+        passwordField.value = 'password123';
+        showMessage('Filled demo credentials. Submit to test validation.', false, 3000);
+      });
+
+      function showMessage(text, isError=false, timeout=0){
+        messageArea.style.display = 'block';
+        messageArea.textContent = text;
+        messageArea.style.background = isError ? '#fff1f2' : '#fff7ed';
+        messageArea.style.color = isError ? '#7f1d1d' : '#92400e';
+        if(timeout>0){ setTimeout(()=>{ messageArea.style.display='none'; }, timeout); }
+      }
+
+      setRole('patient');
+      window.handleCredentialResponse = function(response) {
+
+  console.log("Google JWT Credential:", response.credential);
+
+
+  showMessage("Google Sign-In successful!", false, 3000);
+};
+
+
+    })();
+  </script>
+</body>
+</html>
